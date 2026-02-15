@@ -25,6 +25,9 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cilium/ebpf v0.11.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/cloudwego/eino-ext/components/document/loader/file v0.0.0-20260214075714-8f11ae8e65a2 // indirect
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/markdown v0.0.0-20260214075714-8f11ae8e65a2 // indirect
+	github.com/cloudwego/eino-ext/components/document/transformer/splitter/semantic v0.0.0-20260214075714-8f11ae8e65a2 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.1.13 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20211118104740-dabe8e521a4f // indirect

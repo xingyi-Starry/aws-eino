@@ -28,6 +28,5 @@ func main() {
 	}
 
 	fmt.Println("length of res:", len(res))
-	fmt.Println("vector_0:", res[0])
-	fmt.Println("vector_1:", res[1])
+	fmt.Println("vector dim:", len(res[0]))
 }
