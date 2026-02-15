@@ -32,7 +32,12 @@ func main() {
 	}
 	embedder := component.NewEmbedderWrap(ctx, embedderRaw, 25)
 
-	indexer, err := component.NewMilvusIndexer(ctx, cfg.MilvusIndexerConfig, embedder)
+	mc, err := component.NewMilvusClient(ctx, cfg.MilvusClientConfig)
+	if err != nil {
+		logrus.Fatalf("failed to create milvus client: %v", err)
+	}
+
+	indexer, err := component.NewMilvusIndexer(ctx, cfg.MilvusIndexerConfig, mc, embedder)
 	if err != nil {
 		logrus.Fatalf("failed to create indexer: %v", err)
 	}

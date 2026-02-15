@@ -9,16 +9,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type MilvusClientConfig struct {
+	Address  string `yaml:"address"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	DbName   string `yaml:"db_name"`
+}
+
 type MilvusIndexerConfig struct {
-	Address    string `yaml:"address"`
-	Username   string `yaml:"username"`
-	Password   string `yaml:"password"`
-	DbName     string `yaml:"db_name"`
 	Collection string `yaml:"collection"`
 	Dimension  int64  `yaml:"dimension"`
 }
 
-func NewMilvusClient(ctx context.Context, config *MilvusIndexerConfig) (*milvusclient.Client, error) {
+func NewMilvusClient(ctx context.Context, config *MilvusClientConfig) (*milvusclient.Client, error) {
 	//初始化客户端
 	client, err := milvusclient.New(ctx, &milvusclient.ClientConfig{
 		Address:  config.Address,
@@ -34,12 +37,7 @@ func NewMilvusClient(ctx context.Context, config *MilvusIndexerConfig) (*milvusc
 	return client, nil
 }
 
-func NewMilvusIndexer(ctx context.Context, config *MilvusIndexerConfig, embedder embedding.Embedder) (*milvus2.Indexer, error) {
-	client, err := NewMilvusClient(ctx, config)
-	if err != nil {
-		return nil, err
-	}
-
+func NewMilvusIndexer(ctx context.Context, config *MilvusIndexerConfig, client *milvusclient.Client, embedder embedding.Embedder) (*milvus2.Indexer, error) {
 	indexer, err := milvus2.NewIndexer(ctx, &milvus2.IndexerConfig{
 		Client:     client,
 		Collection: config.Collection,

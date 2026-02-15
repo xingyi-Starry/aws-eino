@@ -10,7 +10,9 @@ import (
 type Config struct {
 	OpenAiChatModelConfig   *component.OpenAiChatModelConfig   `yaml:"open_ai_chat_model"`
 	DashScopeEmbedderConfig *component.DashScopeEmbedderConfig `yaml:"dash_scope_embedder"`
+	MilvusClientConfig      *component.MilvusClientConfig      `yaml:"milvus_client"`
 	MilvusIndexerConfig     *component.MilvusIndexerConfig     `yaml:"milvus_indexer"`
+	MilvusRetrieverConfig   *component.MilvusRetrieverConfig   `yaml:"milvus_retriever"`
 }
 
 func LoadConfig(path string) (*Config, error) {
