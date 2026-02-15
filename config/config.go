@@ -1,0 +1,27 @@
+package config
+
+import (
+	"awseino/service/component"
+	"os"
+
+	"gopkg.in/yaml.v3"
+)
+
+type Config struct {
+	OpenAiChatModelConfig   *component.OpenAiChatModelConfig   `yaml:"open_ai_chat_model"`
+	DashScopeEmbedderConfig *component.DashScopeEmbedderConfig `yaml:"dash_scope_embedder"`
+	MilvusIndexerConfig     *component.MilvusIndexerConfig     `yaml:"milvus_indexer"`
+}
+
+func LoadConfig(path string) (*Config, error) {
+	yamlFile, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var config Config
+	if err := yaml.Unmarshal(yamlFile, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
