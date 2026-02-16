@@ -3,14 +3,12 @@ package main
 import (
 	"awseino/config"
 	"awseino/service/component"
+	"awseino/service/compose"
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"os"
-	"strings"
 
-	"github.com/cloudwego/eino/schema"
+	"github.com/cloudwego/eino/components/tool"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,39 +44,26 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Failed to create openai chat model: %v", err)
 	}
+	retrieveTool, err := component.NewRetrieveTool(ctx, retriever)
+	if err != nil {
+		logrus.Fatalf("Failed to create retrieve tool: %v", err)
+	}
+
+	chain, err := compose.NewChain(ctx, &compose.ChainConfig{
+		ChatModel: cm,
+		Tools:     []tool.BaseTool{retrieveTool},
+	})
+	if err != nil {
+		logrus.Fatalf("Failed to create chain: %v", err)
+	}
 
 	var input string
 	fmt.Print("> ")
 	fmt.Scanln(&input)
 
-	docs, err := retriever.Retrieve(ctx, input)
+	output, err := chain.Invoke(ctx, input)
 	if err != nil {
-		logrus.Fatalf("Failed to retrieve documents: %v", err)
+		logrus.Fatalf("Failed to invoke chain: %v", err)
 	}
-
-	var sysMsgContent strings.Builder
-	sysMsgContent.WriteString("以下是一些相关文档，请根据文档内容回答问题。")
-	for _, doc := range docs {
-		fmt.Fprintf(&sysMsgContent, "\n\n---\n\n%s", doc.Content)
-		logrus.Infof("retrieved document: %s", doc.ID)
-	}
-
-	msgs := []*schema.Message{
-		schema.SystemMessage(sysMsgContent.String()),
-		schema.UserMessage(input),
-	}
-
-	stream, err := cm.Stream(ctx, msgs)
-	fmt.Println("")
-	for {
-		chunk, err := stream.Recv()
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				logrus.Errorf("Failed to receive chunk: %v", err)
-			}
-			break
-		}
-		fmt.Print(chunk.Content)
-	}
-	logrus.Infof("stream finished")
+	fmt.Println(output)
 }
