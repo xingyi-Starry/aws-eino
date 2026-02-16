@@ -1,6 +1,7 @@
 package config
 
 import (
+	"awseino/lib/logger"
 	"awseino/service/component"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 )
 
 type Config struct {
+	LoggerConfig            *logger.LogConfig                  `yaml:"logger"`
 	OpenAiChatModelConfig   *component.OpenAiChatModelConfig   `yaml:"open_ai_chat_model"`
 	DashScopeEmbedderConfig *component.DashScopeEmbedderConfig `yaml:"dash_scope_embedder"`
 	MilvusClientConfig      *component.MilvusClientConfig      `yaml:"milvus_client"`
