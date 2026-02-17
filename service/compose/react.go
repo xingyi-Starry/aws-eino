@@ -71,6 +71,7 @@ func NewReAct(ctx context.Context, cfg *ReActConfig) (compose.Runnable[map[strin
 
 	branch := compose.NewStreamGraphBranch(func(ctx context.Context, input *schema.StreamReader[*schema.Message]) (endNode string, err error) {
 		count := 0
+		defer input.Close()
 		for {
 			msg, err := input.Recv()
 			count++

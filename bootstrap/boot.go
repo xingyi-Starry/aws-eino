@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"awseino/config"
 	"awseino/lib"
+	"awseino/lib/cozeloop"
 	"awseino/lib/logger"
 	"awseino/service/component"
 	"context"
@@ -13,6 +14,10 @@ import (
 func MustInit(ctx context.Context, cfg *config.Config) {
 	var err error
 	logger.MustInitLogger(cfg.LoggerConfig)
+	lib.CozeloopClient, err = cozeloop.InitCozeloop(ctx, cfg.CozeloopConfig)
+	if err != nil {
+		logrus.Fatalf("Failed to init cozeloop: %v", err)
+	}
 	lib.Embedder, err = component.NewDashScopeEmbedder(ctx, cfg.DashScopeEmbedderConfig)
 	if err != nil {
 		logrus.Fatalf("Failed to create embedder: %v", err)

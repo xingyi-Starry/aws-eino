@@ -1,6 +1,7 @@
 package config
 
 import (
+	"awseino/lib/cozeloop"
 	"awseino/lib/logger"
 	"awseino/service/component"
 	"os"
@@ -15,6 +16,7 @@ type Config struct {
 	MilvusClientConfig      *component.MilvusClientConfig      `yaml:"milvus_client"`
 	MilvusIndexerConfig     *component.MilvusIndexerConfig     `yaml:"milvus_indexer"`
 	MilvusRetrieverConfig   *component.MilvusRetrieverConfig   `yaml:"milvus_retriever"`
+	CozeloopConfig          *cozeloop.CozeloopConfig           `yaml:"cozeloop"`
 }
 
 func LoadConfig(path string) (*Config, error) {

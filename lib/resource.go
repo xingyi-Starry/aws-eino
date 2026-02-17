@@ -6,8 +6,11 @@ import (
 	"github.com/cloudwego/eino/components/embedding"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
+	"github.com/coze-dev/cozeloop-go"
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
 )
+
+var CozeloopClient cozeloop.Client
 
 var Embedder embedding.Embedder
 var MilvusClient *milvusclient.Client

@@ -26,6 +26,8 @@ func main() {
 
 	bootstrap.MustInit(ctx, cfg)
 
+	defer lib.CozeloopClient.Close(ctx)
+
 	react, err := cps.NewReAct(ctx, &cps.ReActConfig{
 		ChatModel:    lib.ChatModel,
 		Tools:        []tool.BaseTool{lib.RetrieveTool},
@@ -55,4 +57,5 @@ func main() {
 		}
 		fmt.Print(chunk)
 	}
+
 }
