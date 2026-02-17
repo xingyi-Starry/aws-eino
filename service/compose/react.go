@@ -3,6 +3,7 @@ package compose
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/prompt"
@@ -68,11 +69,28 @@ func NewReAct(ctx context.Context, cfg *ReActConfig) (compose.Runnable[map[strin
 		return nil, err
 	}
 
-	branch := compose.NewGraphBranch(func(ctx context.Context, input *schema.Message) (endNode string, err error) {
-		if len(input.ToolCalls) > 0 {
-			return nodeToolCall, nil
+	branch := compose.NewStreamGraphBranch(func(ctx context.Context, input *schema.StreamReader[*schema.Message]) (endNode string, err error) {
+		count := 0
+		for {
+			msg, err := input.Recv()
+			count++
+			if err == io.EOF {
+				return nodeOutput, nil
+			}
+			if err != nil {
+				return nodeOutput, err
+			}
+
+			if len(msg.ToolCalls) > 0 {
+				return nodeToolCall, nil
+			}
+
+			if len(msg.Content) == 0 { // skip empty chunks at the front
+				continue
+			}
+
+			return nodeOutput, nil
 		}
-		return nodeOutput, nil
 	}, map[string]bool{
 		nodeToolCall: true,
 		nodeOutput:   true,
@@ -84,14 +102,18 @@ func NewReAct(ctx context.Context, cfg *ReActConfig) (compose.Runnable[map[strin
 		return nil, err
 	}
 
-	output := compose.InvokableLambda(func(ctx context.Context, input *schema.Message) (string, error) {
-		return input.Content, nil
-	})
+	output := compose.TransformableLambda(
+		func(ctx context.Context, input *schema.StreamReader[*schema.Message]) (*schema.StreamReader[string], error) {
+			return schema.StreamReaderWithConvert(input, func(src *schema.Message) (string, error) {
+				return src.Content, nil
+			}), nil
+		},
+	)
 
 	eh := &errHandler{}
-	eh.handleErr(g.AddChatTemplateNode(nodeTpl, tpl, compose.WithStatePostHandler(addHistories)))
-	eh.handleErr(g.AddChatModelNode(nodeChatModel, cm, compose.WithStatePostHandler(addHistory)))
-	eh.handleErr(g.AddToolsNode(nodeToolCall, toolNode, compose.WithStatePostHandler(addHistories)))
+	eh.handleErr(g.AddChatTemplateNode(nodeTpl, tpl))
+	eh.handleErr(g.AddChatModelNode(nodeChatModel, cm, compose.WithStatePreHandler(addHistories)))
+	eh.handleErr(g.AddToolsNode(nodeToolCall, toolNode, compose.WithStatePreHandler(addHistory)))
 	eh.handleErr(g.AddLambdaNode(nodeOutput, output))
 	eh.handleErr(g.AddBranch(nodeChatModel, branch))
 	if err = eh.GetError(); err != nil {

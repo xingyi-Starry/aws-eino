@@ -7,7 +7,9 @@ import (
 	"awseino/service/common"
 	cps "awseino/service/compose"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/compose"
@@ -37,9 +39,20 @@ func main() {
 	fmt.Print("> ")
 	fmt.Scanln(&input)
 
-	output, err := react.Invoke(ctx, map[string]any{"input": input}, compose.WithCallbacks(common.GenCallback()))
+	output, err := react.Stream(ctx, map[string]any{"input": input}, compose.WithCallbacks(common.GenCallback()))
 	if err != nil {
 		logrus.Fatalf("Failed to invoke react: %v", err)
 	}
-	fmt.Println(output)
+
+	for {
+		chunk, err := output.Recv()
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				logrus.Errorf("Failed to receive chunk: %v", err)
+			}
+			logrus.Infof("Stream ended")
+			break
+		}
+		fmt.Print(chunk)
+	}
 }
