@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/compose"
@@ -58,4 +59,5 @@ func main() {
 		fmt.Print(chunk)
 	}
 
+	time.Sleep(5 * time.Second) // 太nm荒谬了，cozeloop没有一个可用的异步等待上报完成的接口
 }
